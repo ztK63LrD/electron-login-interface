@@ -13,7 +13,6 @@
 * {
   margin: 0;
   padding: 0;
-  -webkit-app-region: drag;
   box-sizing: border-box;
 }
 .container {
