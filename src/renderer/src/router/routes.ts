@@ -15,18 +15,5 @@ export const constantRoute = [
         meta: {
             title: '后台页面',
         },
-    },
-    {
-        path: '/404',
-        name: '404',
-        component: () => import('@renderer/views/404/index.vue'),
-        meta: {
-            title: '404界面',
-        },
-    },
-    {
-        path: '/:pathMatch(.*)*',
-        name: 'any',
-        redirect: '/404',
-    },
+    }
 ]

@@ -11,21 +11,51 @@ function createWindow(): void {
     show: false,
     frame: false, // 无边框模式
     resizable: false, // 不可缩放
-    autoHideMenuBar: true,
+    autoHideMenuBar: true, // 自动隐藏菜单栏
+    maximizable: false, // 不可最大化
     ...(process.platform === 'linux' ? { icon } : {}),
     webPreferences: {
       preload: join(__dirname, '../preload/index.js'),
-      sandbox: false
+      sandbox: false, // 沙盒模式，默认是 true
+      nodeIntegration: true, // 默认是 false, 设置为 true 可以使用 nodejs 的 API
+      contextIsolation: false, // 默认是 true, 设置为 false 可以使用 remote 模块
     }
   })
 
-  mainWindow.on('ready-to-show', () => {
-    mainWindow.show()
-  })
 
   mainWindow.webContents.setWindowOpenHandler((details) => {
     shell.openExternal(details.url)
     return { action: 'deny' }
+  })
+  // 获取版本数据
+  ipcMain.handle('getVersion', () => {
+    const versions = {
+      electron: process.versions.electron,
+      node: process.versions.node,
+      chrome: process.versions.chrome,  // 如果需要的话，也可以获取 Chrome 的版本
+    };
+    return versions;
+
+  })
+  // 关闭窗口
+  ipcMain.on('close-main-window', (event) => {
+    event.preventDefault()
+    mainWindow.close()
+  })
+
+  // 登录页窗口大小
+  ipcMain.handle('login-window-size', () => {
+    mainWindow.setSize(320, 450) // 设置窗口大小
+    mainWindow.setMinimizable(true) // 允许最小化窗口
+    mainWindow.center() // 居中窗口
+    mainWindow.setResizable(false) // 允许窗口缩放, 默认是 false
+  })
+  // 首页窗口大小
+  ipcMain.handle('home-window-size', () => {
+    mainWindow.setSize(800, 600) // 设置窗口大小
+    mainWindow.setMaximizable(true) // 允许最大化窗口
+    mainWindow.center() // 居中窗口
+    mainWindow.setResizable(true) // 允许窗口缩放, 默认是 false
   })
 
   // HMR for renderer base on electron-vite cli.
@@ -35,6 +65,15 @@ function createWindow(): void {
   } else {
     mainWindow.loadFile(join(__dirname, '../renderer/index.html'))
   }
+
+  mainWindow.on('ready-to-show', () => {
+    mainWindow.setSize(320, 450) // 设置窗口大小
+    mainWindow.setMinimizable(true) // 允许最小化窗口
+    mainWindow.center() // 居中窗口
+    mainWindow.setResizable(false) // 允许窗口缩放, 默认是 false
+    mainWindow.show()
+  })
+
 }
 
 // This method will be called when Electron has finished

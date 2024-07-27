@@ -10,10 +10,10 @@
         </div>
       </div>
       <div class="header-right">
-        <div class="emplace">
+        <div class="emplace" @click="handleEmplace">
           <el-icon :size="15"><Connection class="icon" /></el-icon>
         </div>
-        <div class="close">
+        <div class="close" @click="handleClose">
           <el-icon :size="15"><Close /></el-icon>
         </div>
       </div>
@@ -30,6 +30,21 @@
         <Footer></Footer>
       </div>
     </div>
+    <el-dialog
+      v-model="dialogVisible"
+      title="当时版本数据："
+      width="500"
+      align-center
+    >
+      <div>electron: {{ versions.electron }}</div>
+      <div>node: {{ versions.node }}</div>
+      <div>chrome: {{ versions.chrome }}</div>
+      <template #footer>
+        <div class="dialog-footer">
+          <el-button type="primary" @click="dialogVisible = false">确认</el-button>
+        </div>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
@@ -39,9 +54,12 @@ import { ref, onMounted } from 'vue'
 import { Close, Connection, VideoCamera } from '@element-plus/icons-vue'
 import LoginForm from './components/login-form.vue'
 import Footer from './components/login-footer.vue'
+const { ipcRenderer } = require('electron')
 
 let famousRemark = ref('') // 名言数据
-let avatar = ref('') // 头像数据
+let avatar = ref('') // 头像数据 
+let versions = ref() // 版本数据
+let dialogVisible = ref(false) // 弹窗
 
 // 获取名言数据
 const getFamousRemark = () => {
@@ -55,7 +73,18 @@ const getAvatar = () => {
     avatar.value = res.data.message
   })
 }
+// 获取版本事件
+const handleEmplace = async () => {
+  const result = await ipcRenderer.invoke('getVersion')
+  versions.value = result
+  dialogVisible.value = true
+}
+// 处理关闭事件
+const handleClose = () => {
+  ipcRenderer.send('close-main-window')
+}
 onMounted(() => {
+  ipcRenderer.invoke('login-window-size')
   getFamousRemark()
   getAvatar()
 })
@@ -123,6 +152,7 @@ onMounted(() => {
       width: 60px;
       height: 28px;
       display: flex;
+      -webkit-app-region: no-drag;
       .emplace {
         width: 30px;
         height: 28px;
@@ -134,7 +164,6 @@ onMounted(() => {
       .close {
         width: 30px;
         height: 28px;
-        -webkit-app-region: no-drag;
         display: flex;
         align-items: center;
         justify-content: center;

@@ -34,9 +34,13 @@
   </div>
 </template>
 
-<script setup lang="ts">
+<script setup lang="ts"> 
 import { reactive } from 'vue'
 import { User, Lock } from '@element-plus/icons-vue'
+import { ElMessage } from 'element-plus'
+import { useRouter } from 'vue-router'
+
+const router = useRouter()
 // 收集表单数据
 let loginForm = reactive({
   username: '',
@@ -44,8 +48,15 @@ let loginForm = reactive({
 })
 
 const handleEnter = () => {
-    // 登录
-    console.log(`11`);
+  if (loginForm.username === 'admin' || loginForm.password === '123456') {
+    router.push('/home')
+  } else {
+    ElMessage({
+      message: '登录失败！',
+      type: 'error',
+      duration: 1000
+    })
+  }
 }
 </script>
 
